@@ -10,7 +10,7 @@ properties {
   $uploader = "..\Uploader\S3Uploader.exe"
 } 
 
-task default -depends Release
+task default -depends Compile
 
 task Clean { 
   remove-item -force -recurse $release_dir -ErrorAction SilentlyContinue 
