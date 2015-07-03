@@ -31,7 +31,7 @@ namespace Rhino.Etl.Core.Pipelines
                     DateTime start = DateTime.Now;
                     ExecutePipeline(enumerablePipeline);
                     raiseNotifyExecutionCompleting();
-                    Trace("Completed process {0} in {1}", pipelineName, DateTime.Now - start);
+                    Debug("Completed process {0} in {1}", pipelineName, DateTime.Now - start);
                 }
                 catch (Exception e)
                 {

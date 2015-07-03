@@ -1,6 +1,7 @@
 using System;
 using System.Configuration;
 using System.Data;
+using Common.Logging;
 
 namespace Rhino.Etl.Core.Infrastructure
 {
@@ -12,6 +13,8 @@ namespace Rhino.Etl.Core.Infrastructure
     /// </summary>
     public static class Use
     {
+        private static ILog Logger => LogManager.GetLogger(typeof (Use));
+
         #region Delegates
 
         /// <summary>
@@ -160,6 +163,7 @@ namespace Rhino.Etl.Core.Infrastructure
         {
             if (TransactionCounter <= 0)
             {
+                Logger.Debug("Disposing transaction");
                 ActiveConnection.Dispose();
                 ActiveConnection = null;
             }
@@ -170,6 +174,7 @@ namespace Rhino.Etl.Core.Infrastructure
         /// </summary>
         private static void RollbackTransaction()
         {
+            Logger.Debug("Rolling back transaction");
             ActiveTransaction.Rollback();
             ActiveTransaction.Dispose();
             ActiveTransaction = null;
@@ -184,6 +189,7 @@ namespace Rhino.Etl.Core.Infrastructure
             TransactionCounter--;
             if (TransactionCounter == 0 && ActiveTransaction != null)
             {
+                Logger.Debug("Committing transaction");
                 ActiveTransaction.Commit();
                 ActiveTransaction.Dispose();
                 ActiveTransaction = null;

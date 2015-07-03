@@ -14,7 +14,7 @@ namespace Rhino.Etl.Core
     /// </summary>
     public abstract class EtlProcess : EtlProcessBase<EtlProcess>, IDisposable
     {
-        private IPipelineExecuter pipelineExecuter = new ThreadPoolPipelineExecuter();
+        private IPipelineExecuter pipelineExecuter = new SingleThreadedPipelineExecuter();
 
         /// <summary>
         /// Gets the pipeline executer.
@@ -72,7 +72,7 @@ namespace Rhino.Etl.Core
             Initialize();
             MergeLastOperationsToOperations();
             RegisterToOperationsEvents();
-            Trace("Starting to execute {0}", Name);
+            Debug("Starting to execute {0}", Name);
             PipelineExecuter.Execute(Name, operations, TranslateRows);
 
             PostProcessing();
@@ -102,7 +102,7 @@ namespace Rhino.Etl.Core
         /// <param name="op">The op.</param>
         protected virtual void OnFinishedProcessing(IOperation op)
         {
-            Trace("Finished {0}: {1}", op.Name, op.Statistics);
+            Info("Finished {0}: {1}", op.Name, op.Statistics);
         }
 
         /// <summary>
@@ -121,8 +121,6 @@ namespace Rhino.Etl.Core
         {
             if (op.Statistics.OutputtedRows % 1000 == 0)
                 Info("Processed {0} rows in {1}", op.Statistics.OutputtedRows, op.Name);
-            else
-                Debug("Processed {0} rows in {1}", op.Statistics.OutputtedRows, op.Name);
         }
 
         /// <summary>

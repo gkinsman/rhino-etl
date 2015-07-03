@@ -78,12 +78,10 @@ namespace Rhino.Etl.Core.Operations
                     commandSet.Append(command);
                     if (commandSet.CountOfCommands >= batchSize)
                     {
-                        Debug("Executing batch of {0} commands", commandSet.CountOfCommands);
                         commandSet.ExecuteNonQuery();
                         CreateCommandSet(connection, transaction, ref commandSet, timeout);
                     }
                 }
-                Debug("Executing final batch of {0} commands", commandSet.CountOfCommands);
                 commandSet.ExecuteNonQuery();
 
                 if (PipelineExecuter.HasErrors)
