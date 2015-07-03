@@ -31,6 +31,8 @@ using System;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Reflection;
+using Common.Logging;
+using Rhino.Etl.Core.Operations;
 
 namespace Rhino.Etl.Core.Infrastructure
 {
@@ -56,6 +58,9 @@ namespace Rhino.Etl.Core.Infrastructure
         private readonly AppendCommand doAppend;
         private readonly ExecuteNonQueryCommand doExecuteNonQuery;
         private readonly DisposeCommand doDispose;
+        private readonly ILog _logger = LogManager.GetLogger(typeof(SqlCommandSet));
+        private const int PrimaryKeyViolationErrorCode = 2627;
+
         private int countOfCommands = 0;
 
         static SqlCommandSet()
@@ -118,25 +123,21 @@ namespace Rhino.Etl.Core.Infrastructure
                 throw new ArgumentException("A command in SqlCommandSet must have parameters. You can't pass hardcoded sql strings.");
             }
         }
-        
+
+        /// <summary>
+        /// Gets or sets the primary key behaviour
+        /// </summary>
+        public PrimaryKeyViolationBehaviour PrimaryKeyViolationBehaviour { get; set; } = PrimaryKeyViolationBehaviour.Throw;
+
         /// <summary>
         /// Return the batch command to be executed
         /// </summary>
-        public SqlCommand BatchCommand
-        {
-            get
-            {
-                return commandGetter();
-            }
-        }
-        
+        public SqlCommand BatchCommand => commandGetter();
+
         /// <summary>
         /// The number of commands batched in this instance
         /// </summary>
-        public int CountOfCommands
-        {
-            get { return countOfCommands; }
-        }
+        public int CountOfCommands => countOfCommands;
 
         /// <summary>
         /// Executes the batch
@@ -147,10 +148,27 @@ namespace Rhino.Etl.Core.Infrastructure
         public int ExecuteNonQuery()
         {
             Guard.Against<ArgumentException>(Connection == null,
-                                             "Connection was not set! You must set the connection property before calling ExecuteNonQuery()");
-            if(CountOfCommands==0)
+                "Connection was not set! You must set the connection property before calling ExecuteNonQuery()");
+            if (CountOfCommands == 0)
                 return 0;
-            return doExecuteNonQuery();
+            if (PrimaryKeyViolationBehaviour == PrimaryKeyViolationBehaviour.Ignore)
+            {
+                try
+                {
+                    doExecuteNonQuery();
+                }
+                catch (SqlException ex) when (ex.Number == PrimaryKeyViolationErrorCode)
+                {
+                    _logger.Trace("Ignoring PRIMARY KEY violation");
+                    return 0;
+                }
+            }
+            else
+            {
+                return doExecuteNonQuery();
+            }
+
+            return -1;
         }
 
         ///<summary>
@@ -186,6 +204,7 @@ namespace Rhino.Etl.Core.Infrastructure
         {
             doDispose();
         }
+
 
         #region Delegate Definations
         private delegate void PropSetter<T>(T item);

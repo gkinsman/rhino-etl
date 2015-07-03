@@ -1,4 +1,5 @@
 using System.Configuration;
+using System.Data.SqlClient;
 using Rhino.Etl.Core.Enumerables;
 using Rhino.Etl.Core.Infrastructure;
 
@@ -12,6 +13,8 @@ namespace Rhino.Etl.Core.Operations
     /// </summary>
     public abstract class OutputCommandOperation : AbstractCommandOperation
     {
+        private const int PrimaryKeyViolationErrorCode = 2627;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="OutputCommandOperation"/> class.
         /// </summary>
@@ -46,7 +49,22 @@ namespace Rhino.Etl.Core.Operations
                         currentCommand = cmd;
                         currentCommand.Transaction = transaction;
                         PrepareCommand(currentCommand, row);
-                        currentCommand.ExecuteNonQuery();
+
+                        if (PrimaryKeyViolationBehaviour == PrimaryKeyViolationBehaviour.Ignore)
+                        {
+                            try
+                            {
+                                currentCommand.ExecuteNonQuery();
+                            }
+                            catch (SqlException ex) when (ex.Number == PrimaryKeyViolationErrorCode)
+                            {
+                                Trace("Ignoring PRIMARY KEY violation");
+                            }
+                        }
+                        else
+                        {
+                            currentCommand.ExecuteNonQuery();
+                        }
                     }
                 }
                 if (PipelineExecuter.HasErrors)
@@ -71,5 +89,11 @@ namespace Rhino.Etl.Core.Operations
         /// <param name="cmd">The command.</param>
         /// <param name="row">The row.</param>
         protected abstract void PrepareCommand(IDbCommand cmd, Row row);
+
+
+        /// <summary>
+        /// Gets or sets the primary key behaviour
+        /// </summary>
+        public PrimaryKeyViolationBehaviour PrimaryKeyViolationBehaviour { get; set; } = PrimaryKeyViolationBehaviour.Throw;
     }
 }

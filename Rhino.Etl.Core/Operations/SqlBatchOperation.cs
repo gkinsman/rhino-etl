@@ -12,27 +12,21 @@ namespace Rhino.Etl.Core.Operations
     /// </summary>
     public abstract class SqlBatchOperation : AbstractDatabaseOperation
     {
-        private int batchSize = 50;
-        private int timeout = 30;
-
         /// <summary>
         /// Gets or sets the size of the batch.
         /// </summary>
         /// <value>The size of the batch.</value>
-        public int BatchSize
-        {
-            get { return batchSize; }
-            set { batchSize = value; }
-        }
+        public int BatchSize { get; set; } = 50;
 
         /// <summary>
         /// The timeout of the command set
         /// </summary>
-        public int Timeout
-        {
-            get { return timeout; }
-            set { timeout = value; }
-        }
+        public int Timeout { get; set; } = 30;
+
+        /// <summary>
+        /// Gets or sets the primary key behaviour
+        /// </summary>
+        public PrimaryKeyViolationBehaviour PrimaryKeyViolationBehaviour { get; set; } = PrimaryKeyViolationBehaviour.Throw;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlBatchOperation"/> class.
@@ -61,25 +55,25 @@ namespace Rhino.Etl.Core.Operations
         public override IEnumerable<Row> Execute(IEnumerable<Row> rows)
         {
             Guard.Against<ArgumentException>(rows == null, "SqlBatchOperation cannot accept a null enumerator");
-            using (SqlConnection connection = (SqlConnection)Use.Connection(ConnectionStringSettings))
-            using (SqlTransaction transaction = (SqlTransaction) BeginTransaction(connection))
+            using (var connection = (SqlConnection)Use.Connection(ConnectionStringSettings))
+            using (var transaction = (SqlTransaction) BeginTransaction(connection))
             {
                 SqlCommandSet commandSet = null;
-                CreateCommandSet(connection, transaction, ref commandSet, timeout);
-                foreach (Row row in rows)
+                CreateCommandSet(connection, transaction, ref commandSet, Timeout, PrimaryKeyViolationBehaviour);
+                foreach (var row in rows)
                 {
-                    SqlCommand command = new SqlCommand();
+                    var command = new SqlCommand();
                     PrepareCommand(row, command);
                     if (command.Parameters.Count == 0) //workaround around a framework bug
                     {
-                        Guid guid = Guid.NewGuid();
+                        var guid = Guid.NewGuid();
                         command.Parameters.AddWithValue(guid.ToString(), guid);
                     }
                     commandSet.Append(command);
-                    if (commandSet.CountOfCommands >= batchSize)
+                    if (commandSet.CountOfCommands >= BatchSize)
                     {
                         commandSet.ExecuteNonQuery();
-                        CreateCommandSet(connection, transaction, ref commandSet, timeout);
+                        CreateCommandSet(connection, transaction, ref commandSet, Timeout, PrimaryKeyViolationBehaviour);
                     }
                 }
                 commandSet.ExecuteNonQuery();
@@ -108,15 +102,15 @@ namespace Rhino.Etl.Core.Operations
         /// <param name="command">The command.</param>
         protected abstract void PrepareCommand(Row row, SqlCommand command);
 
-        private static void CreateCommandSet(SqlConnection connection, SqlTransaction transaction, ref SqlCommandSet commandSet, int timeout)
+        private static void CreateCommandSet(SqlConnection connection, SqlTransaction transaction, ref SqlCommandSet commandSet, int timeout, PrimaryKeyViolationBehaviour pkeKeyViolationBehaviour)
         {
-            if (commandSet != null)
-                commandSet.Dispose();
+            commandSet?.Dispose();
             commandSet = new SqlCommandSet
             {
                 Connection = connection, 
                 Transaction = transaction,
-                CommandTimeout = timeout
+                CommandTimeout = timeout,
+                PrimaryKeyViolationBehaviour = pkeKeyViolationBehaviour
             };
         }
     }

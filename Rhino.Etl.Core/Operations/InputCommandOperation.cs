@@ -44,6 +44,7 @@ namespace Rhino.Etl.Core.Operations
                 {
                     currentCommand.Transaction = transaction;
                     PrepareCommand(currentCommand);
+                    Debug("Beginning to read data");
                     using (IDataReader reader = currentCommand.ExecuteReader())
                     {
                         while (reader.Read())
@@ -51,6 +52,7 @@ namespace Rhino.Etl.Core.Operations
                             yield return CreateRowFromReader(reader);
                         }
                     }
+                    Debug("Finished reading data");
                 }
 
                 if (transaction != null) transaction.Commit();
