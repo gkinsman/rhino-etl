@@ -14,7 +14,7 @@ namespace Rhino.Etl.Core
     /// </summary>
     public abstract class EtlProcess : EtlProcessBase<EtlProcess>, IDisposable
     {
-        private IPipelineExecuter pipelineExecuter = new SingleThreadedPipelineExecuter();
+        private IPipelineExecuter pipelineExecuter = new ThreadPoolPipelineExecuter();
 
         /// <summary>
         /// Gets the pipeline executer.
@@ -120,7 +120,7 @@ namespace Rhino.Etl.Core
         protected virtual void OnRowProcessed(IOperation op, Row dictionary)
         {
             if (op.Statistics.OutputtedRows % 1000 == 0)
-                Info("Processed {0} rows in {1}", op.Statistics.OutputtedRows, op.Name);
+                Debug("Processed {0} rows in {1}", op.Statistics.OutputtedRows, op.Name);
         }
 
         /// <summary>
