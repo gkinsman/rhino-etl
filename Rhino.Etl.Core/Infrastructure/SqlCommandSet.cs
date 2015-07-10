@@ -59,7 +59,6 @@ namespace Rhino.Etl.Core.Infrastructure
         private readonly ExecuteNonQueryCommand doExecuteNonQuery;
         private readonly DisposeCommand doDispose;
         private readonly ILog _logger = LogManager.GetLogger(typeof(SqlCommandSet));
-        private const int PrimaryKeyViolationErrorCode = 2627;
 
         private int countOfCommands = 0;
 
@@ -151,24 +150,10 @@ namespace Rhino.Etl.Core.Infrastructure
                 "Connection was not set! You must set the connection property before calling ExecuteNonQuery()");
             if (CountOfCommands == 0)
                 return 0;
-            if (PrimaryKeyViolationBehaviour == PrimaryKeyViolationBehaviour.Ignore)
-            {
-                try
-                {
-                    doExecuteNonQuery();
-                }
-                catch (SqlException ex) when (ex.Number == PrimaryKeyViolationErrorCode)
-                {
-                    _logger.Trace("Ignoring PRIMARY KEY violation");
-                    return 0;
-                }
-            }
-            else
-            {
-                return doExecuteNonQuery();
-            }
 
-            return -1;
+            doExecuteNonQuery();
+
+            return CountOfCommands;
         }
 
         ///<summary>

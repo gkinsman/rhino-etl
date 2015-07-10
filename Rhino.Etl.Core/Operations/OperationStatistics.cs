@@ -77,7 +77,7 @@ namespace Rhino.Etl.Core.Operations
         /// <param name="rowProcessed">The row processed.</param>
         public void AddOutputRows(long rowProcessed)
         {
-            Interlocked.Increment(ref outputtedRows);
+            Interlocked.Add(ref outputtedRows, rowProcessed);
         }
     }
 }

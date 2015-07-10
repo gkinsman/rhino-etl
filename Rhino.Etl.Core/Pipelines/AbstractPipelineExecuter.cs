@@ -61,7 +61,7 @@ namespace Rhino.Etl.Core.Pipelines
         {
             foreach (var operation in pipeline)
             {
-                Info("Preparing {0} for {1}", operation.Name, operation.ToString());
+                Debug("Preparing {0} for {1}", operation.Name, operation.ToString());
                 operation.PrepareForExecution(this);
                 var enumerator = operation.Execute(rows);
                 enumerator = translateEnumerable(enumerator);

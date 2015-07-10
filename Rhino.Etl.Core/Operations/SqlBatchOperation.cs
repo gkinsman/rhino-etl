@@ -24,11 +24,6 @@ namespace Rhino.Etl.Core.Operations
         public int Timeout { get; set; } = 30;
 
         /// <summary>
-        /// Gets or sets the primary key behaviour
-        /// </summary>
-        public PrimaryKeyViolationBehaviour PrimaryKeyViolationBehaviour { get; set; } = PrimaryKeyViolationBehaviour.Throw;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="SqlBatchOperation"/> class.
         /// </summary>
         /// <param name="connectionStringName">Name of the connection string.</param>
@@ -59,7 +54,7 @@ namespace Rhino.Etl.Core.Operations
             using (var transaction = (SqlTransaction) BeginTransaction(connection))
             {
                 SqlCommandSet commandSet = null;
-                CreateCommandSet(connection, transaction, ref commandSet, Timeout, PrimaryKeyViolationBehaviour);
+                CreateCommandSet(connection, transaction, ref commandSet, Timeout);
                 foreach (var row in rows)
                 {
                     var command = new SqlCommand();
@@ -72,11 +67,12 @@ namespace Rhino.Etl.Core.Operations
                     commandSet.Append(command);
                     if (commandSet.CountOfCommands >= BatchSize)
                     {
-                        commandSet.ExecuteNonQuery();
-                        CreateCommandSet(connection, transaction, ref commandSet, Timeout, PrimaryKeyViolationBehaviour);
+                        Statistics.AddOutputRows(commandSet.ExecuteNonQuery());
+
+                        CreateCommandSet(connection, transaction, ref commandSet, Timeout);
                     }
                 }
-                commandSet.ExecuteNonQuery();
+                Statistics.AddOutputRows(commandSet.ExecuteNonQuery());
 
                 if (PipelineExecuter.HasErrors)
                 {
@@ -102,7 +98,7 @@ namespace Rhino.Etl.Core.Operations
         /// <param name="command">The command.</param>
         protected abstract void PrepareCommand(Row row, SqlCommand command);
 
-        private static void CreateCommandSet(SqlConnection connection, SqlTransaction transaction, ref SqlCommandSet commandSet, int timeout, PrimaryKeyViolationBehaviour pkeKeyViolationBehaviour)
+        private static void CreateCommandSet(SqlConnection connection, SqlTransaction transaction, ref SqlCommandSet commandSet, int timeout)
         {
             commandSet?.Dispose();
             commandSet = new SqlCommandSet
@@ -110,7 +106,6 @@ namespace Rhino.Etl.Core.Operations
                 Connection = connection, 
                 Transaction = transaction,
                 CommandTimeout = timeout,
-                PrimaryKeyViolationBehaviour = pkeKeyViolationBehaviour
             };
         }
     }
