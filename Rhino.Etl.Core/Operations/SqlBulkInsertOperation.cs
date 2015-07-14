@@ -241,6 +241,7 @@ namespace Rhino.Etl.Core.Operations
                     Debug("Committing {0}", Name);
                     if (transaction != null) transaction.Commit();
                     Debug("Committed {0}", Name);
+                    Statistics.AddOutputRows(adapter.RecordsAffected);
                 }
             }
             yield break;

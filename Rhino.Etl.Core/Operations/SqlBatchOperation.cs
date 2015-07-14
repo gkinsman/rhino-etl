@@ -21,7 +21,7 @@ namespace Rhino.Etl.Core.Operations
         /// <summary>
         /// The timeout of the command set
         /// </summary>
-        public int Timeout { get; set; } = 30;
+        public int Timeout { get; set; } = 60;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlBatchOperation"/> class.

@@ -46,6 +46,7 @@ namespace Rhino.Etl.Core.Operations
                 {
                     using (IDbCommand cmd = connection.CreateCommand())
                     {
+                        cmd.CommandTimeout = 60*60;
                         currentCommand = cmd;
                         currentCommand.Transaction = transaction;
                         PrepareCommand(currentCommand, row);

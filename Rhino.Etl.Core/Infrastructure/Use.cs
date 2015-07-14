@@ -140,6 +140,7 @@ namespace Rhino.Etl.Core.Infrastructure
             {
                 using (IDbCommand command = ActiveConnection.CreateCommand())
                 {
+                    command.CommandTimeout = 60*60;
                     command.Transaction = ActiveTransaction;
                     actionToExecute(command);
                 }
@@ -257,7 +258,6 @@ namespace Rhino.Etl.Core.Infrastructure
                 // ADO.NET compatible usage of provider name.
                 connection = DbProviderFactories.GetFactory(providerName).CreateConnection();
             }
-
             connection.ConnectionString = connectionString.ConnectionString;
             connection.Open();
             return connection;

@@ -42,6 +42,7 @@ namespace Rhino.Etl.Core.Operations
             {
                 using (currentCommand = connection.CreateCommand())
                 {
+                    currentCommand.CommandTimeout = 60*60;
                     currentCommand.Transaction = transaction;
                     PrepareCommand(currentCommand);
                     Debug("Beginning to read data from {0}", ConnectionStringName);

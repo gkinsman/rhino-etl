@@ -38,7 +38,6 @@ namespace Rhino.Etl.Core.ConventionOperations
         /// <param name="connectionStringName">Name of the connection string.</param>
         public ConventionInputCommandOperation(string connectionStringName) : this(ConfigurationManager.ConnectionStrings[connectionStringName])
         {
-            Timeout = 30;
         }
 
         /// <summary>
