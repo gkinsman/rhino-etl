@@ -16,12 +16,12 @@ namespace Rhino.Etl.Core.Operations
         /// Gets or sets the size of the batch.
         /// </summary>
         /// <value>The size of the batch.</value>
-        public int BatchSize { get; set; } = 50;
+        public int BatchSize { get; set; }
 
         /// <summary>
         /// The timeout of the command set
         /// </summary>
-        public int Timeout { get; set; } = 60;
+        public int Timeout { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlBatchOperation"/> class.
@@ -39,6 +39,8 @@ namespace Rhino.Etl.Core.Operations
         public SqlBatchOperation(ConnectionStringSettings connectionStringSettings)
             : base(connectionStringSettings)
         {
+            BatchSize = 50;
+            Timeout = 60;
             base.paramPrefix = "@";
         }
 
@@ -100,7 +102,7 @@ namespace Rhino.Etl.Core.Operations
 
         private static void CreateCommandSet(SqlConnection connection, SqlTransaction transaction, ref SqlCommandSet commandSet, int timeout)
         {
-            commandSet?.Dispose();
+            commandSet.Dispose();
             commandSet = new SqlCommandSet
             {
                 Connection = connection, 

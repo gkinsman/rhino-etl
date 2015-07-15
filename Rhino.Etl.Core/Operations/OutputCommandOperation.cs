@@ -30,6 +30,7 @@ namespace Rhino.Etl.Core.Operations
         public OutputCommandOperation(ConnectionStringSettings connectionStringSettings)
             : base(connectionStringSettings)
         {
+            PrimaryKeyViolationBehaviour = PrimaryKeyViolationBehaviour.Throw;
         }
 
         /// <summary>
@@ -57,9 +58,13 @@ namespace Rhino.Etl.Core.Operations
                             {
                                 currentCommand.ExecuteNonQuery();
                             }
-                            catch (SqlException ex) when (ex.Number == PrimaryKeyViolationErrorCode)
+                            catch (SqlException ex)
                             {
-                                Trace("Ignoring PRIMARY KEY violation");
+                                if (ex.Number == PrimaryKeyViolationErrorCode)
+                                {
+                                    Trace("Ignoring PRIMARY KEY violation");
+                                }
+                                else throw;
                             }
                         }
                         else
@@ -95,6 +100,6 @@ namespace Rhino.Etl.Core.Operations
         /// <summary>
         /// Gets or sets the primary key behaviour
         /// </summary>
-        public PrimaryKeyViolationBehaviour PrimaryKeyViolationBehaviour { get; set; } = PrimaryKeyViolationBehaviour.Throw;
+        public PrimaryKeyViolationBehaviour PrimaryKeyViolationBehaviour { get; set; }
     }
 }

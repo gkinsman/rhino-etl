@@ -13,7 +13,10 @@ namespace Rhino.Etl.Core.Infrastructure
     /// </summary>
     public static class Use
     {
-        private static ILog Logger => LogManager.GetLogger(typeof (Use));
+        private static ILog Logger
+        {
+            get { return LogManager.GetLogger(typeof (Use)); }
+        }
 
         #region Delegates
 

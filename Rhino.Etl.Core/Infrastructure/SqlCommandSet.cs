@@ -124,19 +124,20 @@ namespace Rhino.Etl.Core.Infrastructure
         }
 
         /// <summary>
-        /// Gets or sets the primary key behaviour
-        /// </summary>
-        public PrimaryKeyViolationBehaviour PrimaryKeyViolationBehaviour { get; set; } = PrimaryKeyViolationBehaviour.Throw;
-
-        /// <summary>
         /// Return the batch command to be executed
         /// </summary>
-        public SqlCommand BatchCommand => commandGetter();
+        public SqlCommand BatchCommand
+        {
+            get { return commandGetter(); }
+        }
 
         /// <summary>
         /// The number of commands batched in this instance
         /// </summary>
-        public int CountOfCommands => countOfCommands;
+        public int CountOfCommands
+        {
+            get { return countOfCommands; }
+        }
 
         /// <summary>
         /// Executes the batch
