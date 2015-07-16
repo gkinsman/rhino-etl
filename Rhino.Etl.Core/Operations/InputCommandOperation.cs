@@ -12,7 +12,7 @@ namespace Rhino.Etl.Core.Operations
     public abstract class InputCommandOperation : AbstractCommandOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="OutputCommandOperation"/> class.
+        /// Initializes a new instance of the <see cref="InputCommandOperation"/> class.
         /// </summary>
         /// <param name="connectionStringName">Name of the connection string.</param>
         public InputCommandOperation(string connectionStringName)
@@ -21,7 +21,7 @@ namespace Rhino.Etl.Core.Operations
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OutputCommandOperation"/> class.
+        /// Initializes a new instance of the <see cref="InputCommandOperation"/> class.
         /// </summary>
         /// <param name="connectionStringSettings">Connection string settings to use.</param>
         public InputCommandOperation(ConnectionStringSettings connectionStringSettings)
