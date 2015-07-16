@@ -102,7 +102,7 @@ namespace Rhino.Etl.Core.Operations
 
         private static void CreateCommandSet(SqlConnection connection, SqlTransaction transaction, ref SqlCommandSet commandSet, int timeout)
         {
-            commandSet.Dispose();
+            if(commandSet != null) commandSet.Dispose();
             commandSet = new SqlCommandSet
             {
                 Connection = connection, 
