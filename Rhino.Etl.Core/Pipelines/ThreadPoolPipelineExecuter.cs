@@ -32,9 +32,7 @@ namespace Rhino.Etl.Core.Pipelines
                 {
                     Error(e, "Failed to execute operation {0}", operation);
                     threadedEnumerator.MarkAsFinished();
-#if DEBUG
-                    throw e;
-#endif
+                    throw;
                 }
                 finally
                 {
